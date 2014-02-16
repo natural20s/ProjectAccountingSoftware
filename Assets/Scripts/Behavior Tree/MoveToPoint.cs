@@ -4,6 +4,8 @@ using System.Collections;
 public class MoveToPoint : Behavior {
 
 	private float m_DistanceThreshold = 1.5f;
+	//private float m_TimeSinceLastUpdate = 0f;
+	//private const float m_TimeBetweenSearches = 0.25f;
 
 
 	public override void OnInitialize() {
@@ -20,18 +22,33 @@ public class MoveToPoint : Behavior {
 			Debug.Log("MoveToPoint failed");
 			return Status.BH_FAILURE;
 		}
+
 		Debug.DrawLine(bb.Trans.position, bb.Destination, Color.red);
 		
 		Vector3 toDestination = bb.Destination - bb.Trans.position;
 
 		if (toDestination.sqrMagnitude <= m_DistanceThreshold * m_DistanceThreshold) {
+			// If we've reached our destination, we're done
 			return Status.BH_SUCCESS;
 		}
-		
-		toDestination.z = 0;
-		toDestination.Normalize();
-		bb.Trans.Translate(toDestination * bb.MoveSpeed * Time.deltaTime);
-		//bb.Trans.Translate(new Vector3(1, 0, 0) * bb.MoveSpeed * Time.deltaTime);
+		else if (bb.PathCurrentIdx >= bb.MovementPath.Length) {
+			// if our path index is out of range of our path nodes, return failure
+			return Status.BH_FAILURE;
+		}
+		//else
+		// Move normally
+		Debug.DrawLine(bb.Trans.position, bb.MovementPath[bb.PathCurrentIdx], Color.green);
+		Vector3 toNextPoint = bb.MovementPath[bb.PathCurrentIdx] - bb.Trans.position;
+
+		if (toNextPoint.sqrMagnitude < 3) { ++bb.PathCurrentIdx; }
+
+		toNextPoint.z = 0;
+		toNextPoint.Normalize();
+		bb.Trans.Translate(toNextPoint * bb.MoveSpeed * Time.deltaTime);
+
+//		toDestination.z = 0;
+//		toDestination.Normalize();
+//		bb.Trans.Translate(toDestination * bb.MoveSpeed * Time.deltaTime);
 
 		return Status.BH_RUNNING;
 	}

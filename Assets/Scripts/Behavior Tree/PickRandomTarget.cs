@@ -8,14 +8,17 @@ public class PickRandomTarget : Behavior {
 	}
 	
 	public override Status Update(ref Blackboard bb) {
-		int xDist = Random.Range(-15, 15);
-		int zDist = Random.Range(-15, 15);
+		int xDist = Random.Range(-10, 10);
+		int zDist = Random.Range(-10, 10);
 		
 		Vector3 newLocation = new Vector3(xDist, bb.Trans.position.y, zDist);
 		
 		if ((newLocation - bb.Trans.position).sqrMagnitude >= 8) {
-			bb.Destination = newLocation;
 			Debug.Log("PickRandomPoint found new point");
+
+			bb.Destination = newLocation;
+			bb.MovementPath = NavGraphConstructor.Instance.FindPathToLocation(bb.Trans.position, newLocation);
+			bb.PathCurrentIdx = 0;
 			return Status.BH_SUCCESS;
 		}
 		

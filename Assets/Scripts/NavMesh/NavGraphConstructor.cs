@@ -231,17 +231,17 @@ public class NavGraphConstructor : MonoBehaviour
 					AddNode(neighborPoint, ref currentNode, ref q);
 					
 					// diagonals
-					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist + incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist - incrementDist );
-					AddNode(neighborPoint, ref currentNode, ref q);
-					
-					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist - incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist - incrementDist );
-					AddNode(neighborPoint, ref currentNode, ref q);
-					
-					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist - incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist + incrementDist );
-					AddNode(neighborPoint, ref currentNode, ref q);
-					
-					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist + incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist + incrementDist );
-					AddNode(neighborPoint, ref currentNode, ref q);
+//					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist + incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist - incrementDist );
+//					AddNode(neighborPoint, ref currentNode, ref q);
+//					
+//					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist - incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist - incrementDist );
+//					AddNode(neighborPoint, ref currentNode, ref q);
+//					
+//					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist - incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist + incrementDist );
+//					AddNode(neighborPoint, ref currentNode, ref q);
+//					
+//					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist + incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist + incrementDist );
+//					AddNode(neighborPoint, ref currentNode, ref q);
 					
 				}
 			}	 

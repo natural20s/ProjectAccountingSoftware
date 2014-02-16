@@ -12,4 +12,7 @@ public class Blackboard {
 	public float MoveSpeed = 2.0f;
 	public Transform Trans;
 	public Transform Player;
+
+	public Vector3[] MovementPath;
+	public int PathCurrentIdx;
 }

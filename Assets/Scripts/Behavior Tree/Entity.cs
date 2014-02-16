@@ -56,9 +56,9 @@ public class Entity : MonoBehaviour {
 		m_Chase = new Chase(moveBehavior, m_Bt);
 		m_Flee = new Flee(moveBehavior, m_Bt);
 		
-		//repeat.m_Child = randomMove;
+		repeat.m_Child = randomMove;
 		
-		m_Bt.Start(m_Chase, this.SequenceComplete);
+		m_Bt.Start(repeat, this.SequenceComplete);
 	}
 	
 	public void SequenceComplete(Status status) {
