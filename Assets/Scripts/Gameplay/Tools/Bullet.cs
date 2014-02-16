@@ -14,7 +14,7 @@ public class Bullet : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		m_Trans = transform;
-		m_Rigidbody = m_Trans.rigidbody;
+		//m_Rigidbody = m_Trans.rigidbody;
 	}
 	
 	// Update is called once per frame
