@@ -3,7 +3,7 @@ using System.Collections;
 
 public class PickRandomTarget : Behavior {
 	
-	public override void OnInitialize() {
+	public override void OnInitialize(ref Blackboard bb) {
 		//Debug.Log("PickRandomTarget init");
 	}
 	

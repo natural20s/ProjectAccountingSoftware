@@ -12,7 +12,7 @@ public class Entity : MonoBehaviour {
 	private Flee m_Flee;
 	private Chase m_Chase;
 	*/
-	private bool m_IsChasing = true;
+	//private bool m_IsChasing = true;
 	
 	// Use this for initialization
 	void Start () {

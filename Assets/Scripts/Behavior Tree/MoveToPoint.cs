@@ -5,7 +5,7 @@ public class MoveToPoint : Behavior {
 
 	private float m_DistanceThreshold = 1.5f;
 
-	public override void OnInitialize() {
+	public override void OnInitialize(ref Blackboard bb) {
 		//Debug.Log("MoveToPoint Init");
 	}
 
@@ -54,7 +54,7 @@ public class CheckForBeacon : Behavior {
 
 	}
 
-	public override void OnInitialize() {
+	public override void OnInitialize(ref Blackboard bb) {
 		//Debug.Log("CheckForBeacon Initialize");
 	}
 
@@ -74,47 +74,42 @@ public class CheckForBeacon : Behavior {
 	}
 }
 
-// Chase is basically going to be just calling MoveToPoint, except we'll update our destination
-//public class Chase : Decorator {
-//	
-//	private BehaviorTree m_Bt;
-//	
-//	public Chase (Behavior child, BehaviorTree bt) : base(child) {
-//		m_Bt = bt;
-//	}
-//	
-//	public override void OnInitialize() {
-//		Debug.Log("Chase::Init");
-//		BehaviorObserver observer = OnChildComplete;
-//		m_Bt.Start(m_Child, observer);
-//	}
-//	
-//	public override void OnTerminate(Status status) {
-//		Debug.Log("Chase::Terminate");
-//	}
-//	
-//	public override Status Update(ref Blackboard bb) {
-//
-//		RaycastHit2D hitInfo = Physics2D.Raycast(bb.Trans.position, bb.ToPlayer2D.normalized, 150);
-//
-//		// logic for determining what to chase (beacon, player, etc.)
-//
-//
-//
-//		if (hitInfo != null && hitInfo.transform.tag == "Player") {
-//			Debug.Log("AI can see player");
-//			bb.MovementPath = NavGraphConstructor.Instance.FindPathToLocation(bb.Trans.position, bb.Player.position);
-//			bb.Destination = bb.Player.position;
-//		}
-//
-//
-//		return Status.BH_RUNNING;
-//	}
-//	
-//	public void OnChildComplete (Status status) {
-//		m_Bt.Stop(m_Child, status);
-//	}
-//};
+public class CanSeePlayer : Behavior {
+
+	private const float m_TimeBeforeBailingOut = 1.0f;
+
+	public CanSeePlayer() {}
+
+	public override void OnInitialize(ref Blackboard bb) {
+		Debug.Log ("CanSeePlayer Initialize");
+		bb.TimeSincePlayerLOS = m_TimeBeforeBailingOut;
+	}
+
+	public override Status Update(ref Blackboard bb) {
+		RaycastHit2D hitInfo = Physics2D.Raycast(bb.Trans.position, bb.ToPlayer2D.normalized, 150);
+
+		if (hitInfo && hitInfo.transform.tag == "Player") {
+			Debug.Log("AI can see player");
+			bb.TimeSincePlayerLOS = 0.0f;
+			bb.SetDestinationAndPath(bb.Player.position);
+
+			return Status.BH_SUCCESS; // is returning Success here mean we're goin to OnIntialize next frame?
+		}
+		else if (bb.TimeSincePlayerLOS >= m_TimeBeforeBailingOut) {
+			// We don't currently have sight of the player, and we don't have a history
+			// of viewing the player, so we fail
+			return Status.BH_FAILURE;
+		}
+		// else
+		// We must have some history of viewing the player (aka TimeSincePlayerLOS < m_TimmeBeforeBailingOut)
+		// so we'll increment the timer
+		bb.TimeSincePlayerLOS += Time.deltaTime;
+
+		return Status.BH_RUNNING;
+	}
+}
+
+
 //
 //public class Flee : Decorator {
 //	private BehaviorTree m_Bt;

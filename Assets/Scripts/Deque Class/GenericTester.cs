@@ -4,6 +4,9 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using Sanford.Collections.Generic;
 
+// "The variable "xxx" is assigned a value but never used
+#pragma warning disable 0219
+
 namespace DequeTest
 {
     public class GenericTester
@@ -319,3 +322,4 @@ namespace DequeTest
         }
     }
 }
+#pragma warning restore 0219

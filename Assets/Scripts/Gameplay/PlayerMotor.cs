@@ -4,16 +4,12 @@ using System.Collections;
 public class PlayerMotor : MonoBehaviour {
 	
 	public float m_Speed = 50.0f;
-	private float m_MaxForce = 10.0f;
-	
-	
+
 	private Transform m_Trans;
-	private Rigidbody m_Rigidbody;
 	
 	// Use this for initialization
 	void Start () {
 		m_Trans = transform;
-		m_Rigidbody = m_Trans.rigidbody;
 	}
 	
 	// Update is called once per frame

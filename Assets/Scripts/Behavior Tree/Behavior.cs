@@ -16,13 +16,13 @@ public abstract class Behavior {
 		m_Status = Status.BH_INVALID;
 	}
 
-	public virtual void OnInitialize() {}
+	public virtual void OnInitialize(ref Blackboard bb) {}
 	public virtual void OnTerminate(Status status) {}
 	public abstract Status Update(ref Blackboard bb);
 
 	public Status Tick(ref Blackboard bb) {
-		if (m_Status == Status.BH_INVALID) { // should this be == BH_INVALID? I think so...
-			OnInitialize();
+		if (m_Status != Status.BH_RUNNING) { // should this be == BH_INVALID?
+			OnInitialize(ref bb);
 		}
 		
 		m_Status = Update(ref bb);

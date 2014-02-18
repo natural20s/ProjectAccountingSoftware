@@ -13,7 +13,7 @@ public abstract class Composite :  Behavior {
 	public void RemoveChild(Behavior child) {}
 	public void CleaerChildren() {}
 
-	public override void OnInitialize() {
+	public override void OnInitialize(ref Blackboard bb) {
 		//Debug.Log("Composite::OnInitialize");
 		m_CurrentChild = 0;
 	}
@@ -69,12 +69,6 @@ public class Root : Composite {
 			Status retStatus = m_Children[m_CurrentChild].Tick(ref bb);
 			
 			if (retStatus == Status.BH_RUNNING) {
-				// reset all subtrees except the currentchild?
-				for (int idx = 0; idx < m_Children.Count; ++idx) {
-					if (m_CurrentChild != idx) {
-						m_Children[idx].Reset();
-					}
-				}
 				return retStatus;
 			}
 			

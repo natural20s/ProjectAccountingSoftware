@@ -11,6 +11,7 @@ public class Blackboard {
 	public Vector3 Destination;
 	public float MoveSpeed = 2.0f;
 	public Vector3 Beacon = Vector3.zero;
+	public float TimeSincePlayerLOS = 0.0f;
 
 	public Transform Trans;
 	public Transform Player;
