@@ -7,72 +7,88 @@ public abstract class Composite :  Behavior {
 	public List<Behavior> m_Children = new List<Behavior>();
 	
 	private int m_CurrentIndex;
-	
-	protected void ResetChildPointer() {
-		m_CurrentIndex = m_Children.Count - 1;
+
+	public void AddChild(Behavior child) { m_Children.Add(child); }
+
+	public void RemoveChild(Behavior child) {}
+	public void CleaerChildren() {}
+
+	public override void OnInitialize() {
+		//Debug.Log("Composite::OnInitialize");
+		m_CurrentChild = 0;
 	}
-	
-	protected Behavior NextChild() {
-		if (m_CurrentIndex < 0) {
-			return null;
+
+	public override void OnTerminate(Status status) {
+		//Debug.Log("Sequence Terminate");
+		if (status != Status.BH_SUCCESS) {
+			Reset();
 		}
-		
-		m_CurrentIndex--; // decrement our index so after we leave this function it points to the current child
-		return m_Children[m_CurrentIndex + 1]; // add 1 to get the correct child
 	}
 	
+	public override void Reset() {
+		base.Reset();
+		m_CurrentChild = 0;
+		
+		for (int idx = 0; idx < m_Children.Count; ++idx) {
+			m_Children[idx].Reset();
+		}
+	}
+
+	protected int m_CurrentChild;
 }
 
 public class Sequence : Composite {
 	
-	public Sequence(ref BehaviorTree bt) {
-		m_BehaviorTree = bt;
-	}
-	
-	public override void OnInitialize() {
-		ResetChildPointer();
-		m_Current = NextChild();
-		BehaviorObserver observer = this.OnChildComplete;
-		m_BehaviorTree.Start(m_Current, observer); //TODO do these need to be refs?
-	}
-		
-	public void OnChildComplete(Status status) {
-		Debug.Log("Sequence OnChildComplete");
-		Behavior child = m_Current;
-		
-		if (child.m_Status == Status.BH_FAILURE) {
-			m_BehaviorTree.Stop(this, Status.BH_FAILURE);
-		}
-		
-		if (child.m_Status != Status.BH_SUCCESS) {
-			Debug.LogError("Sequence - child status should be SUCCESS, but isn't!");
-		}
-		
-		m_Current = NextChild();
-		if (m_Current == null) {
-			m_BehaviorTree.Stop(this, Status.BH_SUCCESS);
-			
-			//m_Status = Status.BH_INVALID;
-		}
-		else {
-			BehaviorObserver observer = this.OnChildComplete;
-			m_BehaviorTree.Start(m_Current, observer);
-		}
-	}
+	public Sequence() {
+	}	
 		
 	public override Status Update(ref Blackboard bb) {
-		return Status.BH_RUNNING;
+		for(;;) {
+			Status retStatus = m_Children[m_CurrentChild].Tick(ref bb);
+
+			if (retStatus != Status.BH_SUCCESS) {
+				return retStatus;
+			}
+
+			// Hit the end of the array, we're done!
+			if (++m_CurrentChild == m_Children.Count) {
+				return Status.BH_SUCCESS;
+			}
+		}
+
 	}
-	
-	public override void OnTerminate(Status status) {
-		Debug.Log("Sequence Terminate");
-	}
-	
-	protected BehaviorTree m_BehaviorTree;
-	protected Behavior m_Current; // is this right? Are we starting from the correct end?
 };
 
-public class Decorator : Behavior {
+public class Root : Composite {
+
+	public Root() {}
+
+	public override Status Update(ref Blackboard bb) {
+		m_CurrentChild = 0; // each tick we want to restart
+		for(;;) {
+			Status retStatus = m_Children[m_CurrentChild].Tick(ref bb);
+			
+			if (retStatus == Status.BH_RUNNING) {
+				// reset all subtrees except the currentchild?
+				for (int idx = 0; idx < m_Children.Count; ++idx) {
+					if (m_CurrentChild != idx) {
+						m_Children[idx].Reset();
+					}
+				}
+				return retStatus;
+			}
+			
+			// We're the root and we've completed all of our children, let's reset
+			if (++m_CurrentChild == m_Children.Count) {
+				//Debug.Log("Root - reset everything");
+				Reset(); // this will reset every node in the tree
+				return Status.BH_SUCCESS;
+			}
+		}
+	}
+}
+
+public abstract class Decorator : Behavior {
 	public Behavior m_Child;
 	
 	public Decorator (Behavior child) {
@@ -80,101 +96,98 @@ public class Decorator : Behavior {
 	}
 	
 	public Decorator() {}
-	
-	public override Status Update(ref Blackboard bb) {
-		return Status.BH_RUNNING;
-	}
 }
 
-public class Repeat : Decorator {
-	
-	// A count of < 0 will signify to repeat until failure
-	public Repeat(ref BehaviorTree bt, Behavior child, int count) : base(child) {
-		m_Bt = bt;
-		m_Child = child;
-		m_TimesToRepeat = count;
-	}
-	
-	public Repeat(ref BehaviorTree bt, int count) {
-		m_Bt = bt;
-		m_TimesToRepeat = count;
-	}
-	
-	public override void OnInitialize() {
-		if (m_Child == null) {
-			Debug.LogError("Trying to init Repeat when m_Child isn't set");
-		}
-		m_RepeatCount = 0;
-		BehaviorObserver observer = OnChildComplete;
-		m_Bt.Start(m_Child, observer);
-	}
-	
-	public void OnChildComplete(Status status) {
-		
-		if (++m_RepeatCount < m_TimesToRepeat || m_TimesToRepeat < 0) {
-			// reinit the child
-			// do this instead of "m_Bt.Start(m_Child), since the child still exists in the dequeue.
-			// Alternatively, we could Bt.Stop then Bt.Start. Perhaps if Terminate functions need to get called,
-			// that would be the proper way to handle it
-			m_Child.m_Status = Status.BH_INVALID;
-		}
-		else if (m_RepeatCount >= m_TimesToRepeat) {
-			m_Bt.Stop(m_Child, Status.BH_SUCCESS);
-		}
-	}
-	public override Status Update(ref Blackboard bb) {
-		return Status.BH_RUNNING;
-	}
-	
-	private int m_TimesToRepeat; // set in constructor: number of times we're supposed to repeat the child. -1 for infinite
-	private int m_RepeatCount; // number of times we've completed and restarted the child
-	private BehaviorTree m_Bt;
-}
 
-public class MockBehavior : Behavior {
-	public int m_InitializeCalled = 0;
-	public int m_TerminateCalled = 0;
-	public int m_UpdateCalled = 0;
-	public Status m_ReturnStatus = Status.BH_RUNNING;
-	public Status m_TerminateStatus = Status.BH_INVALID;
-	
-	public MockBehavior() {}
-	
-	public override void OnInitialize() {
-		++m_InitializeCalled;
-	}
-	
-	public override void OnTerminate(Status e) {
-		++m_TerminateCalled;
-		m_TerminateStatus = e;
-	}
-	
-	public override Status Update(ref Blackboard bb) {
-		++m_UpdateCalled;
-		return m_ReturnStatus;
-	}
-};
+//public class Repeat : Decorator {
+//	
+//	// A count of < 0 will signify to repeat until failure
+//	public Repeat(ref BehaviorTree bt, Behavior child, int count) : base(child) {
+//		m_Bt = bt;
+//		m_Child = child;
+//		m_TimesToRepeat = count;
+//	}
+//	
+//	public Repeat(ref BehaviorTree bt, int count) {
+//		m_Bt = bt;
+//		m_TimesToRepeat = count;
+//	}
+//	
+//	public override void OnInitialize() {
+//		if (m_Child == null) {
+//			Debug.LogError("Trying to init Repeat when m_Child isn't set");
+//		}
+//		m_RepeatCount = 0;
+//		BehaviorObserver observer = OnChildComplete;
+//		m_Bt.Start(m_Child, observer);
+//	}
+//	
+//	public void OnChildComplete(Status status) {
+//		
+//		if (++m_RepeatCount < m_TimesToRepeat || m_TimesToRepeat < 0) {
+//			// reinit the child
+//			// do this instead of "m_Bt.Start(m_Child), since the child still exists in the dequeue.
+//			// Alternatively, we could Bt.Stop then Bt.Start. Perhaps if Terminate functions need to get called,
+//			// that would be the proper way to handle it
+//			m_Child.m_Status = Status.BH_INVALID;
+//		}
+//		else if (m_RepeatCount >= m_TimesToRepeat) {
+//			m_Bt.Stop(m_Child, Status.BH_SUCCESS);
+//		}
+//	}
+//	public override Status Update(ref Blackboard bb) {
+//		return Status.BH_RUNNING;
+//	}
+//	
+//	private int m_TimesToRepeat; // set in constructor: number of times we're supposed to repeat the child. -1 for infinite
+//	private int m_RepeatCount; // number of times we've completed and restarted the child
+//	private BehaviorTree m_Bt;
+//}
 
-
-public class MockComposite<T> : Composite {
-	
-	public MockComposite(BehaviorTree bt, int size) {
-		for (int i = 0; i < size; ++i) {
-			m_Children.Add(new MockBehavior());
-		}
-	}
-	
-	// can't overload [] in C#, just make an accessor I guess
-	public MockBehavior Get(int index)
-	{
-		if (index >= m_Children.Count) {
-			Debug.LogError("Accessing invalid index on MockBehavior! " + index + " out of " + m_Children.Count);
-		}
-		
-		return (MockBehavior)m_Children[index];
-	}
-	
-	public override Status Update(ref Blackboard bb) {
-		return Status.BH_RUNNING;
-	}
-}
+//public class MockBehavior : Behavior {
+//	public int m_InitializeCalled = 0;
+//	public int m_TerminateCalled = 0;
+//	public int m_UpdateCalled = 0;
+//	public Status m_ReturnStatus = Status.BH_RUNNING;
+//	public Status m_TerminateStatus = Status.BH_INVALID;
+//	
+//	public MockBehavior() {}
+//	
+//	public override void OnInitialize() {
+//		++m_InitializeCalled;
+//	}
+//	
+//	public override void OnTerminate(Status e) {
+//		++m_TerminateCalled;
+//		m_TerminateStatus = e;
+//	}
+//	
+//	public override Status Update(ref Blackboard bb) {
+//		++m_UpdateCalled;
+//		return m_ReturnStatus;
+//	}
+//};
+//
+//
+//public class MockComposite<T> : Composite {
+//	
+//	public MockComposite(BehaviorTree bt, int size) {
+//		for (int i = 0; i < size; ++i) {
+//			m_Children.Add(new MockBehavior());
+//		}
+//	}
+//	
+//	// can't overload [] in C#, just make an accessor I guess
+//	public MockBehavior Get(int index)
+//	{
+//		if (index >= m_Children.Count) {
+//			Debug.LogError("Accessing invalid index on MockBehavior! " + index + " out of " + m_Children.Count);
+//		}
+//		
+//		return (MockBehavior)m_Children[index];
+//	}
+//	
+//	public override Status Update(ref Blackboard bb) {
+//		return Status.BH_RUNNING;
+//	}
+//}

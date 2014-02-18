@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 public class RunTests : MonoBehaviour {
-
+	/*
 	// Use this for initialization
 	void Start () {
 		SequenceOnePassThrough();	
@@ -77,4 +77,5 @@ public class RunTests : MonoBehaviour {
 	public static void DelegateHandler(Status status) {
 		Debug.Log("DelegateHandler called: " + status);
 	}
+	*/
 }

@@ -100,7 +100,8 @@ public class NavGraphConstructor : MonoBehaviour
 	{	
 		searchStart = FindClosestPoint(startLocation);
 		searchEnd = FindClosestPoint(mPlayer.position);
-		
+
+		//AStar(searchStart, searchEnd);
 		DisplayPath( AStar(searchStart, searchEnd) );
 		return NodePathToPoint();
 	}
@@ -116,7 +117,7 @@ public class NavGraphConstructor : MonoBehaviour
 		searchStart.z = 0f;
 		searchEnd.z = 0f;
 #endif
-
+		//AStar(searchStart, searchEnd);
 		DisplayPath( AStar(searchStart, searchEnd) );
 		return NodePathToPoint();
 	}
