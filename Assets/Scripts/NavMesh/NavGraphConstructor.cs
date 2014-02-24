@@ -24,10 +24,11 @@ public class NavGraphConstructor : MonoBehaviour
 	
 	public int xCastDistance = 10;
 	public int zCastDistance = 10;
-	public float incrementDist = 1.0f;	
+	public float incrementDistX = 1.0f;	
+	public float incrementDistZ = 1.0f;
 	public float rayCastHeight = 10.0f;
 	public int mNumOfNodes = 0;
-	public int maxNodesToAdd = 50;
+	//public int maxNodesToAdd = 50;
 	
 	public GameObject NodeObj; 
 	public GameObject StartNode;
@@ -52,7 +53,19 @@ public class NavGraphConstructor : MonoBehaviour
 	{
 		
 		//DisplayPath( AStarSearch3(searchStart, searchEnd) );
-		mPlayer = GameObject.FindGameObjectWithTag("Player").transform;
+		GameObject player = GameObject.FindGameObjectWithTag("Player");
+		if (player)
+		{
+			mPlayer = player.transform;
+		}
+
+		for (int idx = 0; idx < Edges.Count; ++idx)
+		{
+			if (Edges[idx].GetFromIndex() == 0 || Edges[idx].GetToIndex() == 0)
+			{
+				//Debug.Log ("Index to 0: " + idx + " going from " + NavigationGraph[Edges[idx].GetFromIndex()] + " to " + NavigationGraph[Edges[idx].GetToIndex()]);
+			}
+		}
 	}
 	
 	void Update()
@@ -61,7 +74,7 @@ public class NavGraphConstructor : MonoBehaviour
 		{
 			foreach ( GraphEdge n in Edges )
 			{
-				Debug.DrawLine(NavigationGraph[n.GetFromIndex()], NavigationGraph[n.GetToIndex()], Color.black);	
+				Debug.DrawLine(NavigationGraph[n.GetFromIndex()], NavigationGraph[n.GetToIndex()], Color.black);
 			}
 		}
 	}
@@ -88,7 +101,9 @@ public class NavGraphConstructor : MonoBehaviour
 	// comments
 	public void SetParametersAndCreateGraph(string incDist, string xCastDist, string zCastDist)
 	{
-		float.TryParse(incDist, out incrementDist);
+		Debug.LogError("ToDo: Need to hook up a variable for incrementDistZ");
+		float.TryParse(incDist, out incrementDistX);
+		//float.TryParse(incDistZ, out blah
 		int.TryParse(xCastDist, out xCastDistance);
 		int.TryParse(zCastDist, out zCastDistance);
 		
@@ -146,12 +161,14 @@ public class NavGraphConstructor : MonoBehaviour
 	{
 		Vector3 fixedPoint = Vector3.zero;
 		
-		fixedPoint.x = (int)desired.x - (int)desired.x%incrementDist;
-		fixedPoint.z = (int)desired.z - (int)desired.z%incrementDist;
+		fixedPoint.x = (int)desired.x - (int)desired.x%incrementDistX;
+
 
 #if USE_XZ
 		fixedPoint.y = 0;
+		fixedPoint.z = (int)desired.z - (int)desired.z%incrementDistZ;
 #else
+		fixedPoint.y = (int)desired.y - (int)desired.y%incrementDistZ;
 		fixedPoint.z = 0;
 #endif
 
@@ -176,7 +193,7 @@ public class NavGraphConstructor : MonoBehaviour
 		// We will keep track of all the valid nodes in our Nodes array
 		Nodes.Add(seed);
 		
-		// note: incrementDist is already a floats
+		// note: incrementDist is already a float
 		// we add 1 to the cast distances because in our loops we start at 0
 		NavigationGraph = new Vector3[(int)( (xCastDistance+2)*(zCastDistance+2) )]; 
 		
@@ -193,12 +210,12 @@ public class NavGraphConstructor : MonoBehaviour
 				// to make sure we don't process an invalid position
 				for ( int n = 0; n < Nodes.Count; ++n )
 				{
-					if ( (xPos*incrementDist + startPoint.x) == Nodes[n].GetPosition().x && 
+					if ( (xPos*incrementDistX + startPoint.x) == Nodes[n].GetPosition().x && 
 #if USE_XZ
-					    (zPos*incrementDist + startPoint.z) == Nodes[n].GetPosition().z )
+					    (zPos*incrementDistX + startPoint.z) == Nodes[n].GetPosition().z )
 					    
 #else
-						(zPos*incrementDist + startPoint.y) == Nodes[n].GetPosition().y )
+						(zPos*incrementDistZ + startPoint.y) == Nodes[n].GetPosition().y )
 #endif // USE_XZ
 					{
 						currentNode = Nodes[n];
@@ -208,40 +225,41 @@ public class NavGraphConstructor : MonoBehaviour
 				
 				if ( currentNode != null )
 				{
+					float xPoint = startPoint.x;
+#if USE_XZ
+					float zPoint = startPoint.z;
+#else
+					float zPoint = startPoint.y;
+#endif
 					// determine the next point we want to check for
-					Vector3 neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist + incrementDist, 
-					                                    rayCastHeight,  
-					                                    startPoint.z + zPos*incrementDist );
+					Vector3 neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX + incrementDistX, 
+					                                    rayCastHeight, zPoint + zPos*incrementDistZ);
 					AddNode(neighborPoint, ref currentNode, ref q);
 					
 					
-					neighborPoint = GetNeighborPoint(startPoint.x  + xPos*incrementDist - incrementDist, 
-					                            rayCastHeight, 
-					                            startPoint.z + zPos*incrementDist);
+					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX - incrementDistX, 
+					                            rayCastHeight, zPoint + zPos*incrementDistZ);
 					AddNode(neighborPoint, ref currentNode, ref q);
 		
-					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist, 
-					                            rayCastHeight, 
-					                            startPoint.z + zPos*incrementDist + incrementDist);
+					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX, 
+					                            rayCastHeight, zPoint + zPos*incrementDistZ + incrementDistZ);
 					AddNode(neighborPoint, ref currentNode, ref q);
 		
-					
-					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist, 
-					                            rayCastHeight, 
-					                            startPoint.z + zPos*incrementDist - incrementDist );
+					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX, 
+					                            rayCastHeight, zPoint + zPos*incrementDistZ - incrementDistZ);
 					AddNode(neighborPoint, ref currentNode, ref q);
 					
 					// diagonals
-//					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist + incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist - incrementDist );
+//					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX + incrementDistX, rayCastHeight, zPoint + zPos*incrementDistZ - incrementDistZ);
 //					AddNode(neighborPoint, ref currentNode, ref q);
 //					
-//					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist - incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist - incrementDist );
+//					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX - incrementDistX, rayCastHeight, zPoint + zPos*incrementDistZ - incrementDistZ);
 //					AddNode(neighborPoint, ref currentNode, ref q);
 //					
-//					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist - incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist + incrementDist );
+//					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX - incrementDistX, rayCastHeight, zPoint + zPos*incrementDistZ + incrementDistZ);
 //					AddNode(neighborPoint, ref currentNode, ref q);
 //					
-//					neighborPoint = GetNeighborPoint(startPoint.x + xPos*incrementDist + incrementDist, rayCastHeight, startPoint.z + zPos*incrementDist + incrementDist );
+//					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX + incrementDistX, rayCastHeight, zPoint + zPos*incrementDistZ + incrementDistZ);
 //					AddNode(neighborPoint, ref currentNode, ref q);
 					
 				}
@@ -305,9 +323,18 @@ public class NavGraphConstructor : MonoBehaviour
 #endif // USE_XZ
 				if ( !Physics.Linecast(currentNode.GetPosition() + heightOffset, newNode.GetPosition() + heightOffset, out hitInfo, layerMask) ) 
 				{
+					//if (currentNode.GetPosition() == Vector3.zero || newNode.GetPosition() == Vector3.zero)
+					{
+						//Debug.Log ("One of these nodes are zero " + currentNode.GetPosition() + " " + newNode.GetPosition());
+					}
+
 					Edges.Add(newEdge);	
 					currentNode.AddEdge(newEdge);
 				}
+			}
+			else
+			{
+				Debug.Log ("Hit object " + hitInfo.transform.name);
 			}
 		}
 	}

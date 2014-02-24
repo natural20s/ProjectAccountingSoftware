@@ -24,7 +24,7 @@ public class PlayerInput : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
-		if (Input.GetKey(KeyCode.F)) {
+		if (Input.GetKey(KeyCode.Alpha1)) {
 			m_Gun.TryUsingTool();
 		}
 

@@ -18,12 +18,12 @@ public abstract class Composite :  Behavior {
 		m_CurrentChild = 0;
 	}
 
-	public override void OnTerminate(Status status) {
+	/*public override void OnTerminate(Status status) {
 		//Debug.Log("Sequence Terminate");
 		if (status != Status.BH_SUCCESS) {
-			Reset();
+			//Reset();
 		}
-	}
+	}*/
 	
 	public override void Reset() {
 		base.Reset();

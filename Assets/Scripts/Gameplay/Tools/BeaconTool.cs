@@ -8,13 +8,13 @@ public class BeaconTool : PlayerTool {
 	private GameObject m_BeaconObject;
 	private Entity m_Enemy;
 	private Transform m_Trans;
+	private const ToolType m_ToolType = ToolType.Beacon;
 
 	public Entity Enemy { get { return m_Enemy; } set { m_Enemy = value; } }
 
 	// Use this for initialization
 	void Start () {
 		m_Trans = transform;
-		m_ToolType = ToolType.Beacon;
 	}
 
 	void Update() {

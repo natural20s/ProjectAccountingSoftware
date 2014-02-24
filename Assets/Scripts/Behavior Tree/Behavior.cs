@@ -10,7 +10,7 @@ public enum Status {
 
 public abstract class Behavior {
 
-	private Status m_Status;
+	protected Status m_Status;
 
 	public Behavior() {
 		m_Status = Status.BH_INVALID;
@@ -21,17 +21,17 @@ public abstract class Behavior {
 	public abstract Status Update(ref Blackboard bb);
 
 	public Status Tick(ref Blackboard bb) {
-		if (m_Status != Status.BH_RUNNING) { // should this be == BH_INVALID?
+        if (m_Status != Status.BH_RUNNING) { // should this be == BH_INVALID?
 			OnInitialize(ref bb);
 		}
-		
+		//Debug.Log ("Status in Tick " + m_Status);
 		m_Status = Update(ref bb);
-		
+
 		if (m_Status != Status.BH_RUNNING)
 		{
 			OnTerminate(m_Status);
 		}
-		
+		//Debug.Log ("Status in Tick later " + m_Status);
 		return m_Status;
 	}
 

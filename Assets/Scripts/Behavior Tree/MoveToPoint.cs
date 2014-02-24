@@ -6,7 +6,7 @@ public class MoveToPoint : Behavior {
 	private float m_DistanceThreshold = 1.5f;
 
 	public override void OnInitialize(ref Blackboard bb) {
-		//Debug.Log("MoveToPoint Init");
+		//Debug.Log("MoveToPoint Init " + bb.Destination);
 	}
 
 	public override void OnTerminate(Status status) {
@@ -24,18 +24,18 @@ public class MoveToPoint : Behavior {
 		
 		Vector3 toDestination = bb.Destination - bb.Trans.position;
 
-		if (toDestination.sqrMagnitude <= m_DistanceThreshold * m_DistanceThreshold) {
+		if (toDestination.sqrMagnitude <= m_DistanceThreshold * m_DistanceThreshold || 
+		    	bb.PathCurrentIdx >= bb.MovementPath.Length) {
 			// If we've reached our destination, we're done
+			Debug.Log ("MoveToPoint finish");
 			return Status.BH_SUCCESS;
 		}
-		else if (bb.PathCurrentIdx >= bb.MovementPath.Length) {
-			// if our path index is out of range of our path nodes, return failure
-			return Status.BH_SUCCESS;
-		}
+
 		//else
 		// Move normally
 		Debug.DrawLine(bb.Trans.position, bb.MovementPath[bb.PathCurrentIdx], Color.green);
 		Vector3 toNextPoint = bb.MovementPath[bb.PathCurrentIdx] - bb.Trans.position;
+		toNextPoint.z = 0;
 
 		if (toNextPoint.sqrMagnitude < 3) { ++bb.PathCurrentIdx; }
 
@@ -43,6 +43,7 @@ public class MoveToPoint : Behavior {
 		toNextPoint.Normalize();
 		bb.Trans.Translate(toNextPoint * bb.MoveSpeed * Time.deltaTime);
 
+		m_Status = Status.BH_RUNNING;
 		return Status.BH_RUNNING;
 	}
 };

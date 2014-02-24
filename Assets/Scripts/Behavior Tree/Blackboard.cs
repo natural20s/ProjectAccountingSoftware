@@ -8,8 +8,12 @@ using System.Collections;
  */ 
 public class Blackboard {
 
+	#region random stuff used for testing
+	public Vector3 StartPoint;
+	#endregion
+
 	public Vector3 Destination;
-	public float MoveSpeed = 2.0f;
+	public float MoveSpeed = 5.0f;
 	public Vector3 Beacon = Vector3.zero;
 	public float TimeSincePlayerLOS = 0.0f;
 

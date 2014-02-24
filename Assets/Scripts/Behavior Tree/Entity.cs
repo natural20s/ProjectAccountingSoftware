@@ -16,6 +16,7 @@ public class Entity : MonoBehaviour {
 	
 	// Use this for initialization
 	void Start () {
+		//TestSuite();
 		Restart();
 	}
 	
@@ -37,7 +38,11 @@ public class Entity : MonoBehaviour {
 		// Creating and setting some basic values for the blackboard
 		m_Blackboard = new Blackboard();
 		m_Blackboard.Trans = transform;
-		m_Blackboard.Player = GameObject.FindGameObjectWithTag("Player").transform;
+		m_Blackboard.StartPoint = transform.position;
+		GameObject player = GameObject.FindGameObjectWithTag("Player");
+		if (player) {
+			m_Blackboard.Player = player.transform;
+		}
 		m_Blackboard.Destination = transform.position + new Vector3(10, 0, 5);
 
 
@@ -107,5 +112,43 @@ public class Entity : MonoBehaviour {
 	// Passing a value of Vector3.zero will tell the Enemy that no beacon exists
 	public void BeaconPositionChange(Vector3 beaconLocation) {
 		m_Blackboard.Beacon = beaconLocation;
+	}
+
+
+	public void TestSuite() {
+//		MockBehavior t = new MockBehavior();
+//		CheckEqual(0, t.m_InitializeCalled, "Initialize sanity check");
+//
+//		t.Tick(ref m_Blackboard);
+//		CheckEqual(1, t.m_InitializeCalled, "Initialize Tick check");
+
+
+		MockSequence seq = new MockSequence(2);
+
+		CheckEqual(seq.Tick(ref m_Blackboard), Status.BH_RUNNING, "Sequence first Tick");
+		CheckEqual(0, seq.AtIndex(0).m_TerminateCalled, "Sequence Terminate check");
+
+		seq.AtIndex(0).m_ReturnStatus = Status.BH_FAILURE;
+		CheckEqual(seq.Tick(ref m_Blackboard), Status.BH_FAILURE, "Seq Tick fail check");
+		CheckEqual(1, seq.AtIndex(0).m_TerminateCalled, "Seq Terminate");
+		CheckEqual(0, seq.AtIndex(1).m_InitializeCalled, "Seq Bh2 Init check");
+	}
+
+	private void CheckEqual(int expected, int actual, string testName) {
+		string succeedOrFail = "failed";
+		if (expected == actual) {
+			succeedOrFail = "succeeded";
+		}
+
+		Debug.LogWarning (testName + " " + succeedOrFail + " " + expected + " <-> " + actual);
+	}
+
+	private void CheckEqual(Status expected, Status actual, string testName) {
+		string succeedOrFail = "failed";
+		if (expected == actual) {
+			succeedOrFail = "succeeded";
+		}
+		
+		Debug.LogWarning (testName + " " + succeedOrFail + " " + expected + " <-> " + actual);
 	}
 }
