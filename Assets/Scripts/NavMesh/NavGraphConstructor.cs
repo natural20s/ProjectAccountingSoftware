@@ -332,10 +332,6 @@ public class NavGraphConstructor : MonoBehaviour
 					currentNode.AddEdge(newEdge);
 				}
 			}
-			else
-			{
-				Debug.Log ("Hit object " + hitInfo.transform.name);
-			}
 		}
 	}
 

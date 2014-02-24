@@ -53,12 +53,13 @@ public class Entity : MonoBehaviour {
 		Sequence moveToBeacon = new Sequence();
 
 		//----------------------------------------------------------------------------------
-		// Create leaf behaviors. Should only need one of each
+		// Create leaf behaviors. Should only need one of each.
 		// Some of these get used often (MoveToPoint), others are specific (CheckForBeacon)
 		//----------------------------------------------------------------------------------
 		MoveToPoint moveToPoint = new MoveToPoint(); 
 		PickRandomTarget pickRandomTarget = new PickRandomTarget();
 		CheckForBeacon checkForBeacon = new CheckForBeacon();
+		ChasePlayer chasePlayer = new ChasePlayer();
 
 		//---------------------------------------------------------------------------------------
 		// Building the subtrees.
@@ -75,6 +76,7 @@ public class Entity : MonoBehaviour {
 		// Like before, add behaviors in left to right order
 		//--------------------------------------------------
 		m_Root.AddChild(moveToBeacon);
+		m_Root.AddChild(chasePlayer);
 		m_Root.AddChild(randomMove);
 
 

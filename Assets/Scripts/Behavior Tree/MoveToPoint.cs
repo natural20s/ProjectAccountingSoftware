@@ -3,7 +3,7 @@ using System.Collections;
 
 public class MoveToPoint : Behavior {
 
-	private float m_DistanceThreshold = 1.5f;
+	private const float m_DistanceThreshold = 1.5f;
 
 	public override void OnInitialize(ref Blackboard bb) {
 		//Debug.Log("MoveToPoint Init " + bb.Destination);
@@ -110,6 +110,69 @@ public class CanSeePlayer : Behavior {
 	}
 }
 
+public class ChasePlayer : Behavior {
+	// we wait until the player has moved this far from her last known position (sqrMagnitude distance) before starting raycasts again
+	private const float m_RefindPlayerDist = 5.0f; 
+	private const float m_DistanceThreshold = 1.5f; // sqr distance we need to be to our endpoint
+
+	public ChasePlayer() {}
+
+	public override void OnInitialize(ref Blackboard bb) {
+		//Debug.Log ("ChasePlayer Initialize");
+		bb.LastKnownPlayerPosition = Vector3.zero;
+	}
+
+	// Our exit conditions are
+	// a) we reach the player
+	// b) we reach the  players last known position and we can't find the player after x seconds (second half may be a new behavior)
+	public override Status Update(ref Blackboard bb) {
+
+		if ((bb.LastKnownPlayerPosition - bb.Player.position).sqrMagnitude >= m_RefindPlayerDist) {
+			RaycastHit2D hitInfo = Physics2D.Raycast(bb.Trans.position, bb.ToPlayer2D.normalized, 150);
+			
+			if (hitInfo && hitInfo.transform.tag == "Player") {
+				Debug.Log("AI can see player");
+				bb.LastKnownPlayerPosition = bb.Player.position;
+				bb.SetDestinationAndPath(bb.Player.position);
+			}
+			else if (hitInfo) {
+				Debug.Log("HitInfo " + hitInfo.transform.name);
+			}
+		}
+
+		if (bb.LastKnownPlayerPosition == Vector3.zero) {
+			// We don't have a destination, return failure
+			//Debug.Log("ChasePlayer failed");
+			return Status.BH_FAILURE;
+		}
+			
+		Debug.DrawLine(bb.Trans.position, bb.Destination, Color.red);
+		
+		Vector3 toDestination = bb.Destination - bb.Trans.position;
+		
+		if (toDestination.sqrMagnitude <= m_DistanceThreshold * m_DistanceThreshold || 
+		    bb.PathCurrentIdx >= bb.MovementPath.Length) {
+			// If we've reached our destination, we're done
+			Debug.Log ("ChasePlayer finish");
+			return Status.BH_SUCCESS;
+		}
+		
+		//else
+		// Move normally
+		Debug.DrawLine(bb.Trans.position, bb.MovementPath[bb.PathCurrentIdx], Color.green);
+		Vector3 toNextPoint = bb.MovementPath[bb.PathCurrentIdx] - bb.Trans.position;
+		toNextPoint.z = 0;
+		
+		if (toNextPoint.sqrMagnitude < 3) { ++bb.PathCurrentIdx; }
+		
+		toNextPoint.z = 0;
+		toNextPoint.Normalize();
+		bb.Trans.Translate(toNextPoint * bb.MoveSpeed * Time.deltaTime);
+		
+		m_Status = Status.BH_RUNNING;
+		return Status.BH_RUNNING;
+	}
+}
 
 //
 //public class Flee : Decorator {

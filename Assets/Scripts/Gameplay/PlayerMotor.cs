@@ -38,7 +38,7 @@ public class PlayerMotor : MonoBehaviour {
 		if (ShouldMove) {
 			Rotate(desiredVelocity);
 			
-			m_Trans.Translate(m_Trans.forward * m_Speed * Time.deltaTime, Space.World);
+			m_Trans.Translate(m_Trans.up * m_Speed * Time.deltaTime, Space.World);
 			//m_Rigidbody.velocity = m_Trans.forward * m_Speed * Time.deltaTime;
 			//m_Rigidbody.AddForce(m_Trans.forward * m_Speed * Time.deltaTime, ForceMode.VelocityChange);
 		}
@@ -49,6 +49,33 @@ public class PlayerMotor : MonoBehaviour {
 	
 	
 	private void Rotate(Vector3 Direction) {
-		m_Trans.LookAt(m_Trans.position + Direction, m_Trans.up);
+		// DON'T LOOK AT ME LIKE THAT
+		if (Direction.x == 0 && Direction.y == m_Speed) { 
+			m_Trans.rotation = Quaternion.Euler(0, 0, 0); 
+		} 
+		else if (Direction.x == -m_Speed && Direction.y == m_Speed) {
+			m_Trans.rotation = Quaternion.Euler(0, 0, 45); 
+		}
+		else if (Direction.x == -m_Speed && Direction.y == 0) {
+			m_Trans.rotation = Quaternion.Euler(0, 0, 90); 
+		}
+		else if (Direction.x == -m_Speed && Direction.y == -m_Speed) {
+			m_Trans.rotation = Quaternion.Euler(0, 0, 135); 
+		}
+		else if (Direction.x == 0 && Direction.y == -m_Speed) {
+			m_Trans.rotation = Quaternion.Euler(0, 0, 180); 
+		}
+		else if (Direction.x == m_Speed && Direction.y == -m_Speed) {
+			m_Trans.rotation = Quaternion.Euler(0, 0,225); 
+		}
+		else if (Direction.x == m_Speed && Direction.y == 0) {
+			m_Trans.rotation = Quaternion.Euler(0, 0,270); 
+		}
+		else if (Direction.x == m_Speed && Direction.y == m_Speed) {
+			m_Trans.rotation = Quaternion.Euler(0, 0, 315); 
+		}
+
+		// Used the following for 3D
+		//m_Trans.LookAt(m_Trans.position + Direction, m_Trans.up);
 	}
 }
