@@ -10,6 +10,8 @@ public class DoorManager : MonoBehaviour
 	public Animator m_doorAnimator;
 	public Collider2D m_colliderRef;
 
+	public bool m_isOpen { get{ return m_doorAnimator.GetCurrentAnimatorStateInfo(0).IsName(DOOR_OPEN_STATE); } }
+
 	public void Start()
 	{
 //		m_openStateHash = Animator.StringToHash("Base." + DOOR_OPEN_STATE); 
@@ -28,7 +30,6 @@ public class DoorManager : MonoBehaviour
 
 		if(m_doorAnimator.GetCurrentAnimatorStateInfo(0).IsName(DOOR_OPEN_STATE))
 		{
-			Debug.Log ("In Open State");
 			m_colliderRef.enabled = false;
 		}
 		else
