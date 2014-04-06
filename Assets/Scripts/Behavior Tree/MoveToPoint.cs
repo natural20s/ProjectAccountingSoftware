@@ -135,9 +135,6 @@ public class ChasePlayer : Behavior {
 				bb.LastKnownPlayerPosition = bb.Player.position;
 				bb.SetDestinationAndPath(bb.Player.position);
 			}
-			else if (hitInfo) {
-				Debug.Log("HitInfo " + hitInfo.transform.name);
-			}
 		}
 
 		if (bb.LastKnownPlayerPosition == Vector3.zero) {

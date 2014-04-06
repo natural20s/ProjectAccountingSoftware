@@ -59,11 +59,12 @@ public class NavGraphConstructor : MonoBehaviour
 			mPlayer = player.transform;
 		}
 
-		for (int idx = 0; idx < Edges.Count; ++idx)
+		for (int idx = 0; idx < 3; ++idx)
 		{
 			if (Edges[idx].GetFromIndex() == 0 || Edges[idx].GetToIndex() == 0)
 			{
-				//Debug.Log ("Index to 0: " + idx + " going from " + NavigationGraph[Edges[idx].GetFromIndex()] + " to " + NavigationGraph[Edges[idx].GetToIndex()]);
+				Debug.Log ("Index " + idx + " going from idx " + Edges[idx].GetFromIndex() + " (" + NavigationGraph[Edges[idx].GetFromIndex()] + 
+				           ") to idx " + Edges[idx].GetToIndex() + " (" + NavigationGraph[Edges[idx].GetToIndex()] + ")");
 			}
 		}
 	}
@@ -72,8 +73,10 @@ public class NavGraphConstructor : MonoBehaviour
 	{
 		if (DisplayEdges)
 		{
-			foreach ( GraphEdge n in Edges )
+			// starting at two, because the first two points have an edge to 0, making the debug info look buggy
+			for (int idx = 2; idx < Edges.Count; ++idx)
 			{
+				GraphEdge n = Edges[idx];
 				Debug.DrawLine(NavigationGraph[n.GetFromIndex()], NavigationGraph[n.GetToIndex()], Color.black);
 			}
 		}
@@ -196,76 +199,44 @@ public class NavGraphConstructor : MonoBehaviour
 		// note: incrementDist is already a float
 		// we add 1 to the cast distances because in our loops we start at 0
 		NavigationGraph = new Vector3[(int)( (xCastDistance+2)*(zCastDistance+2) )]; 
-		
-		//DateTime start = DateTime.Now;
-		
+
 		GraphNode currentNode = new GraphNode(0, startPoint);
-		for ( int xPos = 0; xPos < xCastDistance; ++xPos )
+
+		// TODO put the startPoint.y in a #if. Fix this so the first node gets added
+		// Do one iteration to add the base point. Not totally necessary, this point will probably get found anyway
+		//Vector3 neighbor = GetNeighborPoint(startPoint.x, rayCastHeight, startPoint.y); 
+		//AddNode(neighbor, ref currentNode, ref q);
+		//NavigationGraph[0] = startPoint;
+
+		/** Try a new searching method. BFS **/
+		int count = 0;
+		while ( count < Nodes.Count && Nodes[count] != null )
 		{
-			for ( int zPos = 0; zPos < zCastDistance; ++zPos )
-			{	
-				currentNode = null;
-				
-				// Search for the x and z value we are currently processing in our list of known positions (Nodes) 
-				// to make sure we don't process an invalid position
-				for ( int n = 0; n < Nodes.Count; ++n )
-				{
-					if ( (xPos*incrementDistX + startPoint.x) == Nodes[n].GetPosition().x && 
+			currentNode = Nodes[count];
+
+			float xPoint = currentNode.GetPosition().x;
 #if USE_XZ
-					    (zPos*incrementDistX + startPoint.z) == Nodes[n].GetPosition().z )
-					    
+			float zPoint = currentNode.GetPosition().z;
 #else
-						(zPos*incrementDistZ + startPoint.y) == Nodes[n].GetPosition().y )
-#endif // USE_XZ
-					{
-						currentNode = Nodes[n];
-						break;
-					}
-				}
-				
-				if ( currentNode != null )
-				{
-					float xPoint = startPoint.x;
-#if USE_XZ
-					float zPoint = startPoint.z;
-#else
-					float zPoint = startPoint.y;
+			float zPoint = currentNode.GetPosition().y;
 #endif
-					// determine the next point we want to check for
-					Vector3 neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX + incrementDistX, 
-					                                    rayCastHeight, zPoint + zPos*incrementDistZ);
-					AddNode(neighborPoint, ref currentNode, ref q);
-					
-					
-					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX - incrementDistX, 
-					                            rayCastHeight, zPoint + zPos*incrementDistZ);
-					AddNode(neighborPoint, ref currentNode, ref q);
-		
-					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX, 
-					                            rayCastHeight, zPoint + zPos*incrementDistZ + incrementDistZ);
-					AddNode(neighborPoint, ref currentNode, ref q);
-		
-					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX, 
-					                            rayCastHeight, zPoint + zPos*incrementDistZ - incrementDistZ);
-					AddNode(neighborPoint, ref currentNode, ref q);
-					
-					// diagonals
-//					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX + incrementDistX, rayCastHeight, zPoint + zPos*incrementDistZ - incrementDistZ);
-//					AddNode(neighborPoint, ref currentNode, ref q);
-//					
-//					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX - incrementDistX, rayCastHeight, zPoint + zPos*incrementDistZ - incrementDistZ);
-//					AddNode(neighborPoint, ref currentNode, ref q);
-//					
-//					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX - incrementDistX, rayCastHeight, zPoint + zPos*incrementDistZ + incrementDistZ);
-//					AddNode(neighborPoint, ref currentNode, ref q);
-//					
-//					neighborPoint = GetNeighborPoint(xPoint + xPos*incrementDistX + incrementDistX, rayCastHeight, zPoint + zPos*incrementDistZ + incrementDistZ);
-//					AddNode(neighborPoint, ref currentNode, ref q);
-					
-				}
-			}	 
+			// determine the next point we want to check for
+			Vector3 neighborPoint = GetNeighborPoint(xPoint + incrementDistX, rayCastHeight, zPoint);
+			AddNode(neighborPoint, ref currentNode, ref q);
+			
+			
+			neighborPoint = GetNeighborPoint(xPoint - incrementDistX, rayCastHeight, zPoint);
+			AddNode(neighborPoint, ref currentNode, ref q);
+			
+			neighborPoint = GetNeighborPoint(xPoint, rayCastHeight, zPoint + incrementDistZ);
+			AddNode(neighborPoint, ref currentNode, ref q);
+			
+			neighborPoint = GetNeighborPoint(xPoint, rayCastHeight, zPoint - incrementDistZ);
+			AddNode(neighborPoint, ref currentNode, ref q);
+
+			++count;
 		}
-		//Debug.Log( "Flood fill 2: " + (DateTime.Now - start) );
+
 	}
 	
 	public void AddNode(Vector3 neighborPoint, ref GraphNode currentNode, ref Queue<GraphNode> q )
@@ -290,7 +261,6 @@ public class NavGraphConstructor : MonoBehaviour
 				bool nodeFound = false;
 				while ( !nodeFound && index <= mNumOfNodes )
 				{ 
-					//Debug.Log (index + " out of " + NavigationGraph.Length + " thinks there's only" + mNumOfNodes);
 					nodeFound = ( NavigationGraph[index] == hitInfo.point );
 					
 					++index;
