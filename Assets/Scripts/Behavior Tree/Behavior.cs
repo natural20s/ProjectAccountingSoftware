@@ -5,7 +5,7 @@ using Sanford.Collections;
 using Sanford.Collections.Generic;
 
 public enum Status {
-	BH_INVALID, BH_SUCCESS, BH_FAILURE, BH_RUNNING, BH_ABORTED
+	BH_INVALID, BH_SUCCESS, BH_FAILURE, BH_RUNNING, BH_ABORTED, BH_REMOVE_ON_FINISH
 };
 
 public abstract class Behavior {

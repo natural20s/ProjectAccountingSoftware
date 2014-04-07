@@ -171,6 +171,33 @@ public class ChasePlayer : Behavior {
 	}
 }
 
+public class Stunned : Behavior {
+
+
+	public Stunned() {}
+
+	public override void OnInitialize(ref Blackboard bb) {
+		if (bb.IsStunActive && bb.StunTimeRemaining <= 0f) {
+			Debug.LogError("StunTimeRemaining less than 0.f when initializing Stunned behavior");
+		}
+	}
+
+	public override Status Update(ref Blackboard bb) {
+		if (bb.IsStunActive == false) {
+			return Status.BH_FAILURE;
+		}
+
+		bb.StunTimeRemaining -= Time.deltaTime;
+
+		if (bb.StunTimeRemaining <= 0.0f) {
+			bb.IsStunActive = false; // Not sure where else I could set this...man I feel dirty for using state like this
+			return Status.BH_SUCCESS;
+		}
+
+		return Status.BH_RUNNING;
+	}
+}
+
 //
 //public class Flee : Decorator {
 //	private BehaviorTree m_Bt;

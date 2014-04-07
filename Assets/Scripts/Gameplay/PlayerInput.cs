@@ -7,6 +7,7 @@ public class PlayerInput : MonoBehaviour {
 	private Shooter m_Gun;
 	private BeaconTool m_Beacon;
 	private Entity m_Enemy;
+	private StunGrenadeTool m_StunGrenade;
 	
 	// Use this for initialization
 	void Start () {
@@ -19,6 +20,9 @@ public class PlayerInput : MonoBehaviour {
 
 		m_Beacon = m_Trans.GetComponent<BeaconTool>();
 		m_Beacon.Enemy = m_Enemy;
+
+		m_StunGrenade = m_Trans.GetComponent<StunGrenadeTool>();
+		m_StunGrenade.PlayerTransform = m_Trans;
 	}
 	
 	// Update is called once per frame
@@ -30,6 +34,10 @@ public class PlayerInput : MonoBehaviour {
 
 		if (Input.GetKey(KeyCode.Alpha2)) {
 			m_Beacon.TryUsingTool();
+		}
+
+		if (Input.GetKey(KeyCode.Alpha3)) {
+			m_StunGrenade.TryUsingTool();
 		}
 	}
 }

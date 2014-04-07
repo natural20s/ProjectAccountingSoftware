@@ -6,6 +6,7 @@ public class Entity : MonoBehaviour {
 	
 	public Blackboard m_Blackboard;
 	private Root m_Root = new Root();
+
 	/*private BehaviorTree m_Bt;
 	private Sequence randomMove;
 	
@@ -60,6 +61,7 @@ public class Entity : MonoBehaviour {
 		PickRandomTarget pickRandomTarget = new PickRandomTarget();
 		CheckForBeacon checkForBeacon = new CheckForBeacon();
 		ChasePlayer chasePlayer = new ChasePlayer();
+		Stunned stunned = new Stunned();
 
 		//---------------------------------------------------------------------------------------
 		// Building the subtrees.
@@ -75,6 +77,7 @@ public class Entity : MonoBehaviour {
 		// Add subtrees to the root.
 		// Like before, add behaviors in left to right order
 		//--------------------------------------------------
+		m_Root.AddChild(stunned);
 		m_Root.AddChild(moveToBeacon);
 		m_Root.AddChild(chasePlayer);
 		m_Root.AddChild(randomMove);
@@ -116,6 +119,19 @@ public class Entity : MonoBehaviour {
 		m_Blackboard.Beacon = beaconLocation;
 	}
 
+	public void StunPlayer(float stunTime) {
+		if (stunTime <= 0.0f) {
+			Debug.LogWarning("Passed in a stun time less than or equal to 0.0f, that's probably bad an unintentional");
+		}
+
+		if (m_Blackboard.StunTimeRemaining > 0.0f || m_Blackboard.IsStunActive) {
+			Debug.LogWarning("Trying to stun enemy when it should already be stunned, not adding new state");
+			return;
+		}
+
+		m_Blackboard.IsStunActive = true;
+		m_Blackboard.StunTimeRemaining = stunTime;
+	}
 
 	public void TestSuite() {
 //		MockBehavior t = new MockBehavior();

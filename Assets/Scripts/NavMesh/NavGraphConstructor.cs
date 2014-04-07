@@ -51,21 +51,10 @@ public class NavGraphConstructor : MonoBehaviour
 	// Use this for initialization
 	void Start () 
 	{
-		
-		//DisplayPath( AStarSearch3(searchStart, searchEnd) );
 		GameObject player = GameObject.FindGameObjectWithTag("Player");
 		if (player)
 		{
 			mPlayer = player.transform;
-		}
-
-		for (int idx = 0; idx < 3; ++idx)
-		{
-			if (Edges[idx].GetFromIndex() == 0 || Edges[idx].GetToIndex() == 0)
-			{
-				Debug.Log ("Index " + idx + " going from idx " + Edges[idx].GetFromIndex() + " (" + NavigationGraph[Edges[idx].GetFromIndex()] + 
-				           ") to idx " + Edges[idx].GetToIndex() + " (" + NavigationGraph[Edges[idx].GetToIndex()] + ")");
-			}
 		}
 	}
 	
@@ -247,7 +236,7 @@ public class NavGraphConstructor : MonoBehaviour
 		rayDirection = new Vector3(0, -1, 0);
 #else
 		rayDirection = new Vector3(0, 0, 1);
-#endif //USE_XZ
+#endif
 		int layerMask = 1 << 8;
 		layerMask = ~layerMask;
 		if ( Physics.Raycast(neighborPoint, rayDirection, out hitInfo, Mathf.Infinity, layerMask) )
@@ -290,14 +279,9 @@ public class NavGraphConstructor : MonoBehaviour
 				heightOffset = new Vector3(0, 0.5f, 0);
 #else
 				heightOffset = new Vector3(0, 0, -0.5f);
-#endif // USE_XZ
+#endif
 				if ( !Physics.Linecast(currentNode.GetPosition() + heightOffset, newNode.GetPosition() + heightOffset, out hitInfo, layerMask) ) 
 				{
-					//if (currentNode.GetPosition() == Vector3.zero || newNode.GetPosition() == Vector3.zero)
-					{
-						//Debug.Log ("One of these nodes are zero " + currentNode.GetPosition() + " " + newNode.GetPosition());
-					}
-
 					Edges.Add(newEdge);	
 					currentNode.AddEdge(newEdge);
 				}
@@ -311,7 +295,7 @@ public class NavGraphConstructor : MonoBehaviour
 		return new Vector3(xPoint, raycastHeight, zPoint);
 #else
 		return new Vector3(xPoint, zPoint, -raycastHeight);
-#endif //USE_XZ
+#endif
 	}
 
 	public List<GraphEdge> AStar(Vector3 start, Vector3 end)
@@ -337,9 +321,9 @@ public class NavGraphConstructor : MonoBehaviour
 			// check if we've found the node we want to start at
 #if USE_XZ
 			if (Nodes[index].GetPosition().x == start.x && Nodes[index].GetPosition().z == start.z)
-#else // USE_ZY
+#else
 			if (Nodes[index].GetPosition().x == start.x && Nodes[index].GetPosition().y == start.y)
-#endif //USE_XZ
+#endif
 			{
 				pq.Add(0, index); // add it to our pq
 				gCosts[index] = 0; // set its g cost
@@ -352,7 +336,7 @@ public class NavGraphConstructor : MonoBehaviour
 		Vector2 endPosV2;
 #if USE_XZ 
 		endPosV2 = new Vector2(end.x, end.z);
-#else //USE_XY
+#else
 		endPosV2 = new Vector2(end.x, end.y);
 #endif
 		while (pq.Count() > 0)

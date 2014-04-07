@@ -26,6 +26,10 @@ public class Blackboard {
 
 	public float TimeSinceLastUpdate;
 
+	// holding state for whether we're stunned cause I don't have a clean to to remove behaviors dynamically
+	public bool IsStunActive = false; 
+	public float StunTimeRemaining = 0.0f;
+
 	#region Helper Functions & Properties
 	public Vector2 ToPlayer2D { get { 
 			Vector3 ToPlayer = Player.position - Trans.position; 

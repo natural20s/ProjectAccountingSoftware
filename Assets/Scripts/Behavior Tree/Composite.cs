@@ -63,6 +63,17 @@ public class Root : Composite {
 
 	public Root() {}
 
+	public bool AddChildAtPosition(Behavior child, int idx) {
+
+		if (m_Children != null && idx > m_Children.Count) {
+			Debug.LogWarning("Trying to AddChildAtPosition at invalid index (" + idx + "/" + m_Children.Count + ")");
+			return false;
+		}
+
+		m_Children.Insert(idx, child);
+		return true;
+	}
+
 	public override Status Update(ref Blackboard bb) {
 		m_CurrentChild = 0; // each tick we want to restart
 		for(;;) {
