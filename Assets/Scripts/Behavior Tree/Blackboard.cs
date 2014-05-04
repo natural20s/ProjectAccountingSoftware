@@ -12,14 +12,20 @@ public class Blackboard {
 	public Vector3 StartPoint;
 	#endregion
 
+	// Need to assign these manually. Perhaps make them required of a constructor?
+	public Transform Trans;
+	public Transform Player;
+	public Looker LookAtObject;
+
+
 	public Vector3 Destination;
 	public float MoveSpeed = 5.0f;
 	public Vector3 Beacon = Vector3.zero;
 	public float TimeSincePlayerLOS = 0.0f;
 	public Vector3 LastKnownPlayerPosition = Vector3.zero;
 
-	public Transform Trans;
-	public Transform Player;
+	public float LOSDistance = 80.0f;
+
 
 	public Vector3[] MovementPath;
 	public int PathCurrentIdx;
@@ -31,10 +37,15 @@ public class Blackboard {
 	public float StunTimeRemaining = 0.0f;
 
 	#region Helper Functions & Properties
-	public Vector2 ToPlayer2D { get { 
-			Vector3 ToPlayer = Player.position - Trans.position; 
+	public Vector2 ToPlayer2D { 
+		get { Vector3 ToPlayer = Player.position - Trans.position; 
 			return new Vector2(ToPlayer.x, ToPlayer.y);
-		} }
+			} 
+	}
+
+	public Vector3 ToPlayer { 
+		get { return Player.position - Trans.position; } 
+	}
 
 	// Calling this will get the Entity ready to call the MoveToPoint behavior with no additional work 
 	public void SetDestinationAndPath(Vector3 target) {
@@ -50,6 +61,21 @@ public class Blackboard {
 		}
 		
 		return MovementPath[PathCurrentIdx];
+	}
+	#endregion
+
+	#region Debug variables
+	public bool ShowCurPath = true;
+	public bool ShowLOSCheck = true;
+
+	public void LOSCheck(bool canSeePlayer, Vector3 closestPointToPlayer) {
+		if (ShowLOSCheck) {
+			Color debugColor = Color.yellow;
+			if (canSeePlayer)
+				debugColor = Color.green;
+
+			Debug.DrawLine(Trans.position, closestPointToPlayer, debugColor);
+		}
 	}
 	#endregion
 }

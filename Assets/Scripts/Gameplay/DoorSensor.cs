@@ -12,7 +12,7 @@ public class DoorSensor : MonoBehaviour
 	public void OnTriggerEnter2D(Collider2D col)
 	{
 
-		Debug.Log (col.tag + " Has Entered Sensor");
+		//Debug.Log (col.tag + " Has Entered Sensor");
 		if(col.tag == "Player" || col.tag == "Enemy")
 		{
 			if(!m_trackedActors.Contains(col.transform))
@@ -30,12 +30,12 @@ public class DoorSensor : MonoBehaviour
 
 	public void OnTriggerStay2D(Collider2D col)
 	{
-		Debug.Log (col.tag + " Has Stayed in the Sensor");
+		//Debug.Log (col.tag + " Has Stayed in the Sensor");
 	}
 
 	public void OnTriggerExit2D(Collider2D col)
 	{
-		Debug.Log (col.tag + " Has Exited Sensor");
+		//Debug.Log (col.tag + " Has Exited Sensor");
 		if(col.tag == "Player" || col.tag == "Enemy")
 		{
 			if(m_trackedActors.Contains(col.transform))

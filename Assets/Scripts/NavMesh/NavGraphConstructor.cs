@@ -41,7 +41,7 @@ public class NavGraphConstructor : MonoBehaviour
 	private List<UnityEngine.GameObject> PathNodes = new List<UnityEngine.GameObject>();
 	
 	private Transform mPlayer;
-	
+
 	void Awake()
 	{
 		instance = this;
@@ -66,7 +66,7 @@ public class NavGraphConstructor : MonoBehaviour
 			for (int idx = 2; idx < Edges.Count; ++idx)
 			{
 				GraphEdge n = Edges[idx];
-				Debug.DrawLine(NavigationGraph[n.GetFromIndex()], NavigationGraph[n.GetToIndex()], Color.black);
+				Debug.DrawLine(NavigationGraph[n.GetFromIndex()], NavigationGraph[n.GetToIndex()], Color.grey);
 			}
 		}
 	}

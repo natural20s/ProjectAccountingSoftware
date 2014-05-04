@@ -45,6 +45,7 @@ public class Entity : MonoBehaviour {
 			m_Blackboard.Player = player.transform;
 		}
 		m_Blackboard.Destination = transform.position + new Vector3(10, 0, 5);
+		m_Blackboard.LookAtObject = GetComponent<Looker>();
 
 
 		//-------------------------------------------------------------------------
@@ -133,6 +134,7 @@ public class Entity : MonoBehaviour {
 		m_Blackboard.StunTimeRemaining = stunTime;
 	}
 
+	#region Code for testing BT/Behaviors
 	public void TestSuite() {
 //		MockBehavior t = new MockBehavior();
 //		CheckEqual(0, t.m_InitializeCalled, "Initialize sanity check");
@@ -169,4 +171,6 @@ public class Entity : MonoBehaviour {
 		
 		Debug.LogWarning (testName + " " + succeedOrFail + " " + expected + " <-> " + actual);
 	}
+
+	#endregion
 }
