@@ -6,7 +6,7 @@ public class Looker : MonoBehaviour {
 	public Target m_Target = new Target();
 	private Transform m_Trans;
 
-	//public Target Target { get { return m_Target; } }
+	private float m_MaxRotationPerTick = 7.0f; // in degrees
 
 	// Use this for initialization
 	void Start () {
@@ -30,6 +30,8 @@ public class Looker : MonoBehaviour {
 				float secondDotResult = Vector3.Dot (m_Trans.right, targetUnitVector);
 				if (secondDotResult >= 0f)
 					dotResult *= -1;
+
+				dotResult = Mathf.Clamp(dotResult, -m_MaxRotationPerTick, m_MaxRotationPerTick);
 
 				m_Trans.Rotate (new Vector3(0, 0, dotResult));
 			}

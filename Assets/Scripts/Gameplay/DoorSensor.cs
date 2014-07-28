@@ -9,6 +9,7 @@ public class DoorSensor : MonoBehaviour
 
 	private List<Transform> m_trackedActors = new List<Transform>();
 
+
 	public void OnTriggerEnter2D(Collider2D col)
 	{
 

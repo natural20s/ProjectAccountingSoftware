@@ -8,7 +8,13 @@ public class PlayerInput : MonoBehaviour {
 	private BeaconTool m_Beacon;
 	private Entity m_Enemy;
 	private StunGrenadeTool m_StunGrenade;
-	
+
+	private int m_BeaconCount = 0;
+	private int m_GrenadeCount = 0;
+
+	public int BeaconCount { get { return m_BeaconCount; } set { m_BeaconCount = value; } }
+	public int GrenadeCount { get { return m_GrenadeCount; } set { m_GrenadeCount = value; } }
+
 	// Use this for initialization
 	void Start () {
 		m_Trans = transform;
@@ -32,12 +38,33 @@ public class PlayerInput : MonoBehaviour {
 			m_Gun.TryUsingTool();
 		}
 
-		if (Input.GetKey(KeyCode.Alpha2)) {
-			m_Beacon.TryUsingTool();
+		if (Input.GetKey(KeyCode.Alpha2) && m_BeaconCount > 0) {
+			if (m_Beacon.TryUsingTool())
+			{
+				m_BeaconCount--;
+			}
 		}
 
-		if (Input.GetKey(KeyCode.Alpha3)) {
-			m_StunGrenade.TryUsingTool();
+		if (Input.GetKey(KeyCode.Alpha3) && m_GrenadeCount > 0) {
+			if (m_StunGrenade.TryUsingTool())
+			{
+				m_GrenadeCount--;
+			}
+		}
+	}
+
+	public void Refill(ToolType refillType, int refillCount)
+	{
+		switch (refillType) 
+		{
+		case ToolType.Beacon:
+			m_BeaconCount = refillCount;
+			break;
+		case ToolType.Magnet:
+			break;
+		case ToolType.Stunner:
+			m_GrenadeCount = refillCount;
+			break;
 		}
 	}
 }
